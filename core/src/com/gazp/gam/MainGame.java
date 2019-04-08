@@ -77,7 +77,7 @@ public class MainGame extends Game{
 	@Override
 	public void render () {
 	    delta += Gdx.graphics.getDeltaTime();
-		Gdx.gl.glClearColor(0, 0, 0.5f, 1);
+		Gdx.gl.glClearColor(0, 0, 0f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         updateTouches();
@@ -89,7 +89,7 @@ public class MainGame extends Game{
 
 		//lights begin
         frameBuffer.begin();
-        Gdx.gl.glClearColor(.2f,.2f,.2f,1);
+        Gdx.gl.glClearColor(.05f,.05f,.05f,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setBlendFunction(GL20.GL_ONE,GL20.GL_ONE);
         batch.setColor(Color.WHITE);
@@ -100,7 +100,7 @@ public class MainGame extends Game{
         sprite.draw(batch);
 
         for (Vector2 v : light_cells){
-            sprite.setColor(Color.OLIVE);
+            sprite.setColor(Color.PURPLE);
             sprite.setCenter(v.x * 2.5f,v.y * 2.5f);
             sprite.setScale(1+(float)(0.1*Math.sin(delta)));
             sprite.draw(batch);
