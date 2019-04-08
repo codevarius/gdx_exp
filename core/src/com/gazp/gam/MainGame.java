@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class MainGame extends Game{
 	SpriteBatch batch;
-	int x,y;
+	float x,y;
 	FrameBuffer frameBuffer;
 	OrthographicCamera camera;
 	Sprite sprite;
@@ -38,6 +38,7 @@ public class MainGame extends Game{
 
 		tiledMap = new TmxMapLoader().load("map.tmx");
 		mapRenderer = new OrthogonalTiledMapRenderer(tiledMap,2.5f);
+
 		lights = (TiledMapTileLayer)tiledMap.getLayers().get("trees");
 
 		for (int i=0;i<lights.getWidth();i++){
@@ -57,13 +58,16 @@ public class MainGame extends Game{
             for (int j=0;j<start_point.getHeight();j++){
                 if (start_point.getCell(i,j) !=null){
                     if (start_point.getCell(i,j).getTile().getProperties().containsKey("view_start")){
-                        start = new Vector2(i*start_point.getTileWidth() + start_point.getTileWidth(),
-                                j*start_point.getTileHeight() + start_point.getTileHeight());
+                        start = new Vector2(i*start_point.getTileWidth() + start_point.getTileWidth()/2,
+                                j*start_point.getTileHeight() + start_point.getTileHeight()/2);
                     }
                 }
             }
         }
 
+
+
+        System.out.println(start);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         camera.setToOrtho(true,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 	}
@@ -90,7 +94,7 @@ public class MainGame extends Game{
         batch.setColor(Color.WHITE);
         batch.begin();
         sprite.setColor(Color.WHITE);
-        sprite.setCenter(camera.position.x,camera.position.y);
+        sprite.setCenter(start.x*2.5f,start.y*2.5f);
         sprite.setScale(1f);
         sprite.draw(batch);
 
