@@ -65,11 +65,12 @@ public class MainGame extends Game{
             }
         }
 
-
-
         System.out.println(start);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         camera.setToOrtho(true,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        camera.translate(2.5f*start.x - camera.viewportWidth/2,2.5f*start.y - camera.viewportHeight/2);
+        x = 2.5f*start.x - camera.viewportWidth/2;
+        y = 2.5f*start.y - camera.viewportHeight/2;
 	}
 
 
@@ -94,7 +95,7 @@ public class MainGame extends Game{
         batch.setColor(Color.WHITE);
         batch.begin();
         sprite.setColor(Color.WHITE);
-        sprite.setCenter(start.x*2.5f,start.y*2.5f);
+        sprite.setCenter(x+camera.viewportWidth/2,y+camera.viewportHeight/2);
         sprite.setScale(1f);
         sprite.draw(batch);
 
