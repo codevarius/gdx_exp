@@ -1,106 +1,140 @@
 package com.gazp.gam;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Vector2;
 
-public class MainGame extends Game implements InputProcessor {
+import java.util.ArrayList;
+
+public class MainGame extends Game{
 	SpriteBatch batch;
-	Texture img;
 	int x,y;
 	FrameBuffer frameBuffer;
 	OrthographicCamera camera;
 	Sprite sprite;
+	TiledMap tiledMap;
+	OrthogonalTiledMapRenderer mapRenderer;
+	TiledMapTileLayer lights,start_point;
+	ArrayList<Vector2> light_cells;
+	Vector2 start;
+	float delta;
 	
 	@Override
 	public void create () {
+	    light_cells = new ArrayList<Vector2>();
 		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
-		Gdx.input.setInputProcessor(this);
-		frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888,Gdx.graphics.getWidth(),Gdx.graphics.getHeight(),false);
-		camera = new OrthographicCamera();
-		camera.setToOrtho(false,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+		frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888,
+                Gdx.graphics.getWidth(),Gdx.graphics.getHeight(),false);
 		sprite = new Sprite(new Texture(Gdx.files.internal("light.png")));
+		sprite.setSize(200,200);
+
+
+		tiledMap = new TmxMapLoader().load("map.tmx");
+		mapRenderer = new OrthogonalTiledMapRenderer(tiledMap,2.5f);
+		lights = (TiledMapTileLayer)tiledMap.getLayers().get("trees");
+
+		for (int i=0;i<lights.getWidth();i++){
+		    for (int j=0;j<lights.getHeight();j++){
+		        if (lights.getCell(i,j) !=null){
+		            if (lights.getCell(i,j).getTile().getProperties().containsKey("enlighted")){
+		                light_cells.add(new Vector2(i*lights.getTileWidth() + lights.getTileWidth(),
+                                j*lights.getTileHeight() + lights.getTileHeight()));
+                    }
+                }
+            }
+        }
+
+		start_point = (TiledMapTileLayer)tiledMap.getLayers().get("bridges");
+
+        for (int i=0;i<start_point.getWidth();i++){
+            for (int j=0;j<start_point.getHeight();j++){
+                if (start_point.getCell(i,j) !=null){
+                    if (start_point.getCell(i,j).getTile().getProperties().containsKey("view_start")){
+                        start = new Vector2(i*start_point.getTileWidth() + start_point.getTileWidth(),
+                                j*start_point.getTileHeight() + start_point.getTileHeight());
+                    }
+                }
+            }
+        }
+
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        camera.setToOrtho(true,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 	}
+
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
+	    delta += Gdx.graphics.getDeltaTime();
+		Gdx.gl.glClearColor(0, 0, 0.5f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
-		batch.setBlendFunction(GL20.GL_SRC_ALPHA,GL20.GL_ONE_MINUS_SRC_ALPHA);
-		batch.begin();
-		batch.draw(img,x,y);
-		batch.end();
 
+        updateTouches();
+		camera.update();
+		mapRenderer.setView(camera);
+        batch.setProjectionMatrix(camera.combined);
+
+		mapRenderer.render();
+
+		//lights begin
         frameBuffer.begin();
-
         Gdx.gl.glClearColor(.2f,.2f,.2f,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        batch.setProjectionMatrix(camera.combined);
         batch.setBlendFunction(GL20.GL_ONE,GL20.GL_ONE);
+        batch.setColor(Color.WHITE);
         batch.begin();
+        sprite.setColor(Color.WHITE);
+        sprite.setCenter(camera.position.x,camera.position.y);
+        sprite.setScale(1f);
         sprite.draw(batch);
-        batch.end();
 
+        for (Vector2 v : light_cells){
+            sprite.setColor(Color.OLIVE);
+            sprite.setCenter(v.x * 2.5f,v.y * 2.5f);
+            sprite.setScale(1+(float)(0.1*Math.sin(delta)));
+            sprite.draw(batch);
+        }
+
+        batch.end();
         frameBuffer.end();
+
+        batch.setBlendFunction( GL20.GL_ZERO,GL20.GL_SRC_COLOR);
+        batch.begin();
+        batch.draw(frameBuffer.getColorBufferTexture(),x,y);
+        batch.end();
+        //lights end
 	}
 	
 	@Override
 	public void dispose () {
 		batch.dispose();
-		img.dispose();
+		light_cells.clear();
+		tiledMap.dispose();
 	}
 
-    @Override
-    public boolean keyDown(int keycode) {
-	    switch(keycode){
-            case Input.Keys.UP: y = y + 10; break;
-            case Input.Keys.DOWN: y = y - 10; break;
-            case Input.Keys.LEFT: x = x - 10; break;
-            case Input.Keys.RIGHT: x = x + 10; break;
+
+    public void updateTouches(){
+	    if (Gdx.input.isKeyPressed(Input.Keys.UP)){
+            y = y - 10;
+            camera.translate(0,-10);
         }
-        return true;
-    }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
+            y = y + 10;
+            camera.translate(0,10);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+            x = x - 10; camera.translate(-10,0);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            x = x + 10;
+            camera.translate(10,0);
+        }
 
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
     }
 }
