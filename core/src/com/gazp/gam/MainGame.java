@@ -25,6 +25,7 @@ public class MainGame extends Game{
 	ArrayList<Vector2> light_cells;
 	Vector2 start;
 	float delta;
+	float step = 2.0f;
 	
 	@Override
 	public void create () {
@@ -67,9 +68,12 @@ public class MainGame extends Game{
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         camera.setToOrtho(true,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
-        camera.translate(2.5f*start.x - camera.viewportWidth/2,2.5f*start.y - camera.viewportHeight/2);
-        x = 2.5f*start.x - camera.viewportWidth/2;
-        y = 2.5f*start.y - camera.viewportHeight/2;
+
+        camera.translate(mapRenderer.getUnitScale()*start.x - camera.viewportWidth/2,
+                mapRenderer.getUnitScale()*start.y - camera.viewportHeight/2);
+
+        x = mapRenderer.getUnitScale()*start.x - camera.viewportWidth/2;
+        y = mapRenderer.getUnitScale()*start.y - camera.viewportHeight/2;
 	}
 
 
@@ -99,8 +103,8 @@ public class MainGame extends Game{
 
         for (Vector2 v : light_cells){
             sprite.setColor(Color.PURPLE);
-            sprite.setCenter(v.x * 2.5f,v.y * 2.5f);
-            sprite.setScale(1+(float)(0.1*Math.sin(delta)));
+            sprite.setCenter(v.x * mapRenderer.getUnitScale(),v.y * mapRenderer.getUnitScale());
+            sprite.setScale(1+(float)(0.1f*Math.sin(2f*delta)));
             sprite.draw(batch);
         }
 
@@ -124,19 +128,19 @@ public class MainGame extends Game{
 
     public void updateTouches(){
 	    if (Gdx.input.isKeyPressed(Input.Keys.UP)){
-            y = y - 10;
-            camera.translate(0,-10);
+            y = y - step;
+            camera.translate(0,-step);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-            y = y + 10;
-            camera.translate(0,10);
+            y = y + step;
+            camera.translate(0,step);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            x = x - 10; camera.translate(-10,0);
+            x = x - step; camera.translate(-step,0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            x = x + 10;
-            camera.translate(10,0);
+            x = x + step;
+            camera.translate(step,0);
         }
 
     }
