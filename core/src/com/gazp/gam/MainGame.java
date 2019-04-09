@@ -32,6 +32,7 @@ public class MainGame extends Game{
 	TextureRegion[] keyFrameList;
 	TextureRegion currentChrFrame;
 	float frameRate = 0.15f;
+	TiledMapTileLayer block_layer;
 	
 	@Override
 	public void create () {
@@ -42,7 +43,6 @@ public class MainGame extends Game{
             keyFrameList[i].flip(false,true);
         }
 	    wlkDown = new Animation(frameRate,keyFrameList);
-        System.out.println(keyFrameList.length);
         keyFrameList = new TextureRegion[3];
 
         for (int i = 0; i<3;i++){
@@ -77,6 +77,7 @@ public class MainGame extends Game{
 
 
 		tiledMap = new TmxMapLoader().load("map.tmx");
+        block_layer = (TiledMapTileLayer) tiledMap.getLayers().get("blocks");
 		mapRenderer = new OrthogonalTiledMapRenderer(tiledMap,2.5f);
 
 		lights = (TiledMapTileLayer)tiledMap.getLayers().get("trees");
@@ -175,22 +176,26 @@ public class MainGame extends Game{
 
 
     public void updateTouches(){
-
+	    
 	    if (Gdx.input.isKeyPressed(Input.Keys.UP)){
 	        currentChrFrame = wlkUp.getKeyFrame(delta,true);
             y = y - step;
             camera.translate(0,-step);
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
             currentChrFrame = wlkDown.getKeyFrame(delta,true);
             y = y + step;
             camera.translate(0,step);
+
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
             currentChrFrame = wlkLeft.getKeyFrame(delta,true);
             x = x - step;
             camera.translate(-step,0);
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
             currentChrFrame = wlkRight.getKeyFrame(delta,true);
             x = x + step;
