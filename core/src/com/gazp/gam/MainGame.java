@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -27,47 +29,50 @@ public class MainGame extends Game{
 	ArrayList<Vector2> light_cells;
 	Vector2 start;
 	float delta;
-	float step = 2.0f;
-	Animation<TextureRegion> wlkUp,wlkDown,wlkLeft,wlkRight;
-	TextureRegion[] keyFrameList;
-	TextureRegion currentChrFrame;
+	float step = 1.0f;
+	Animation<Sprite> wlkUp,wlkDown,wlkLeft,wlkRight;
+	Sprite[] keyFrameList;
+	Sprite currentChrFrame;
 	float frameRate = 0.15f;
-	TiledMapTileLayer block_layer;
+	float spriteScale = .5f;
 	
 	@Override
 	public void create () {
-	    keyFrameList = new TextureRegion[3];
+	    keyFrameList = new Sprite[3];
 
 	    for (int i = 0; i<3;i++){
-	        keyFrameList[i] = new TextureRegion(new Texture("chr/row-1-col-"+i+".png"));
+	        keyFrameList[i] = new Sprite(new Texture("chr/row-1-col-"+i+".png"));
             keyFrameList[i].flip(false,true);
+            keyFrameList[i].setScale(spriteScale);
         }
 	    wlkDown = new Animation(frameRate,keyFrameList);
-        keyFrameList = new TextureRegion[3];
+        keyFrameList = new Sprite[3];
 
         for (int i = 0; i<3;i++){
-            keyFrameList[i] = new TextureRegion(new Texture("chr/row-2-col-"+i+".png"));
+            keyFrameList[i] = new Sprite(new Texture("chr/row-2-col-"+i+".png"));
             keyFrameList[i].flip(false,true);
+            keyFrameList[i].setScale(spriteScale);
         }
         wlkLeft = new Animation(frameRate,keyFrameList);
-        keyFrameList = new TextureRegion[3];
+        keyFrameList = new Sprite[3];
 
         for (int i = 0; i<3;i++){
-            keyFrameList[i] = new TextureRegion(new Texture("chr/row-3-col-"+i+".png"));
+            keyFrameList[i] = new Sprite(new Texture("chr/row-3-col-"+i+".png"));
             keyFrameList[i].flip(false,true);
+            keyFrameList[i].setScale(spriteScale);
         }
         wlkRight = new Animation(frameRate,keyFrameList);
-        keyFrameList = new TextureRegion[3];
+        keyFrameList = new Sprite[3];
 
         for (int i = 0; i<3;i++){
-            keyFrameList[i] = new TextureRegion(new Texture("chr/row-4-col-"+i+".png"));
+            keyFrameList[i] = new Sprite(new Texture("chr/row-4-col-"+i+".png"));
             keyFrameList[i].flip(false,true);
+            keyFrameList[i].setScale(spriteScale);
         }
                 wlkUp = new Animation(frameRate,keyFrameList);
-        keyFrameList = new TextureRegion[3];
+        keyFrameList = new Sprite[3];
 
         currentChrFrame = wlkDown.getKeyFrame(0); //default
-
 	    light_cells = new ArrayList<Vector2>();
 		batch = new SpriteBatch();
 		frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888,
@@ -77,8 +82,7 @@ public class MainGame extends Game{
 
 
 		tiledMap = new TmxMapLoader().load("map.tmx");
-        block_layer = (TiledMapTileLayer) tiledMap.getLayers().get("blocks");
-		mapRenderer = new OrthogonalTiledMapRenderer(tiledMap,2.5f);
+		mapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
 
 		lights = (TiledMapTileLayer)tiledMap.getLayers().get("trees");
 
@@ -132,7 +136,9 @@ public class MainGame extends Game{
 
         batch.setBlendFunction(GL20.GL_ONE,GL20.GL_ONE_MINUS_SRC_ALPHA);
 		batch.begin();
-		batch.draw(currentChrFrame,x+camera.viewportWidth/2,y+camera.viewportHeight/2);
+		currentChrFrame.setScale(spriteScale);
+		currentChrFrame.setCenter(x+camera.viewportWidth/2,y+camera.viewportHeight/2);
+		currentChrFrame.draw(batch);
         batch.end();
 
         mapRenderer.getBatch().begin();
@@ -176,7 +182,7 @@ public class MainGame extends Game{
 
 
     public void updateTouches(){
-	    
+
 	    if (Gdx.input.isKeyPressed(Input.Keys.UP)){
 	        currentChrFrame = wlkUp.getKeyFrame(delta,true);
             y = y - step;
