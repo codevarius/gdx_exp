@@ -2,8 +2,10 @@ package com.gazp.gam;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -26,9 +28,46 @@ public class MainGame extends Game{
 	Vector2 start;
 	float delta;
 	float step = 2.0f;
+	Animation<TextureRegion> wlkUp,wlkDown,wlkLeft,wlkRight;
+	TextureRegion[] keyFrameList;
+	TextureRegion currentChrFrame;
+	float frameRate = 0.15f;
 	
 	@Override
 	public void create () {
+	    keyFrameList = new TextureRegion[3];
+
+	    for (int i = 0; i<3;i++){
+	        keyFrameList[i] = new TextureRegion(new Texture("chr/row-1-col-"+i+".png"));
+            keyFrameList[i].flip(false,true);
+        }
+	    wlkDown = new Animation(frameRate,keyFrameList);
+        System.out.println(keyFrameList.length);
+        keyFrameList = new TextureRegion[3];
+
+        for (int i = 0; i<3;i++){
+            keyFrameList[i] = new TextureRegion(new Texture("chr/row-2-col-"+i+".png"));
+            keyFrameList[i].flip(false,true);
+        }
+        wlkLeft = new Animation(frameRate,keyFrameList);
+        keyFrameList = new TextureRegion[3];
+
+        for (int i = 0; i<3;i++){
+            keyFrameList[i] = new TextureRegion(new Texture("chr/row-3-col-"+i+".png"));
+            keyFrameList[i].flip(false,true);
+        }
+        wlkRight = new Animation(frameRate,keyFrameList);
+        keyFrameList = new TextureRegion[3];
+
+        for (int i = 0; i<3;i++){
+            keyFrameList[i] = new TextureRegion(new Texture("chr/row-4-col-"+i+".png"));
+            keyFrameList[i].flip(false,true);
+        }
+                wlkUp = new Animation(frameRate,keyFrameList);
+        keyFrameList = new TextureRegion[3];
+
+        currentChrFrame = wlkDown.getKeyFrame(0); //default
+
 	    light_cells = new ArrayList<Vector2>();
 		batch = new SpriteBatch();
 		frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888,
@@ -90,6 +129,15 @@ public class MainGame extends Game{
 
 		mapRenderer.render();
 
+        batch.setBlendFunction(GL20.GL_ONE,GL20.GL_ONE_MINUS_SRC_ALPHA);
+		batch.begin();
+		batch.draw(currentChrFrame,x+camera.viewportWidth/2,y+camera.viewportHeight/2);
+        batch.end();
+
+        mapRenderer.getBatch().begin();
+        mapRenderer.renderTileLayer((TiledMapTileLayer)tiledMap.getLayers().get("trees"));
+        mapRenderer.getBatch().end();
+
 		//lights begin
         frameBuffer.begin();
         Gdx.gl.glClearColor(.15f,.15f,.15f,1);
@@ -127,18 +175,24 @@ public class MainGame extends Game{
 
 
     public void updateTouches(){
+
 	    if (Gdx.input.isKeyPressed(Input.Keys.UP)){
+	        currentChrFrame = wlkUp.getKeyFrame(delta,true);
             y = y - step;
             camera.translate(0,-step);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
+            currentChrFrame = wlkDown.getKeyFrame(delta,true);
             y = y + step;
             camera.translate(0,step);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            x = x - step; camera.translate(-step,0);
+            currentChrFrame = wlkLeft.getKeyFrame(delta,true);
+            x = x - step;
+            camera.translate(-step,0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            currentChrFrame = wlkRight.getKeyFrame(delta,true);
             x = x + step;
             camera.translate(step,0);
         }
