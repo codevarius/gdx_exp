@@ -65,7 +65,6 @@ public class MainGame extends Game{
             }
         }
 
-        System.out.println(start);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         camera.setToOrtho(true,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         camera.translate(2.5f*start.x - camera.viewportWidth/2,2.5f*start.y - camera.viewportHeight/2);
@@ -89,12 +88,11 @@ public class MainGame extends Game{
 
 		//lights begin
         frameBuffer.begin();
-        Gdx.gl.glClearColor(.05f,.05f,.05f,1);
+        Gdx.gl.glClearColor(.15f,.15f,.15f,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setBlendFunction(GL20.GL_ONE,GL20.GL_ONE);
-        batch.setColor(Color.WHITE);
         batch.begin();
-        sprite.setColor(Color.WHITE);
+        sprite.setColor(Color.ORANGE);
         sprite.setCenter(x+camera.viewportWidth/2,y+camera.viewportHeight/2);
         sprite.setScale(1f);
         sprite.draw(batch);
